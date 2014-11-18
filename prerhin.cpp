@@ -1,3 +1,10 @@
+/********************************************************************
+         @filename:  prerhin.cpp
+         @author:    ChenYang
+         @date:      2014/11/18   20:01
+         @brief:     
+ ********************************************************************/
+
 #ifdef _WINDOWS
 #include <Windows.h>
 #endif
@@ -6,6 +13,7 @@
 #include <GL/glu.h>
 #include <math.h>
 #include "prerhin.h"
+#include "vector3.h"
 
 // disable implicit float-double casting
 #pragma warning(disable:4305)
@@ -13,7 +21,6 @@
 struct SphericalCoords polar = {3.0f, 60.0f, 45.0f};
 struct Camera          camera;
 struct MPoint          oldPt = {-1, -1};
-bool lBtnDn = false;
 
 Rhin::Rhin()
 {
@@ -31,6 +38,10 @@ bool Rhin::init()
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glMatrixMode(GL_MODELVIEW);
+    //glLoadIdentity();
+//    gluLookAt(camera.xeye,camera.yeye,camera.zeye, 0.0 , 0.0, 0.0, 0.0, 1.0, 0.0);
     return true;
 }
 
@@ -39,22 +50,6 @@ bool Rhin::close()
     return true;
 }
 
-
-void Rhin::setupProjection(int width, int height)
-{
-    if (height == 0)    // don't want a divide by zero
-        height = 1;
-    glViewport(0, 0, width, height);    // reset the viewport to new
-    glMatrixMode(GL_PROJECTION);    // set projection matrix 
-    glLoadIdentity();   // reset projection matrix
-    gluPerspective(52.0f, (GLfloat)width/(GLfloat)height, 1.0f, 1000.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    windowWidth = width;
-    windowHeight = height;
-}
 
 void Rhin::reshape(int width, int height)
 {
@@ -73,48 +68,23 @@ void Rhin::reshape(int width, int height)
 }
 
 
-void Rhin::prepare(float dt)
-{
-}
-
 void Rhin::render()
 {
-    /*
-    // clear screen and depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);     
-    glLoadIdentity();
-
-    // move back 5 units and rotate about all 3 axes
-    glTranslatef(0.0, 0.0, -5.0f);
-    glRotatef(m_angle, 1.0f, 0.0f, 0.0f);
-    glRotatef(m_angle, 0.0f, 1.0f, 0.0f);
-    glRotatef(m_angle, 0.0f, 0.0f, 1.0f);
-
-    // lime greenish color
-    glColor3f(0.7f, 1.0f, 0.3f);
-
-    // draw the triangle such that the rotation point is in the center
-    glBegin(GL_TRIANGLES);
-    glVertex3f(1.0f, -1.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glEnd();
-    */
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    /*
+   
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(camera.xeye,camera.yeye,camera.zeye, 0.0 , 0.0, 0.0, 0.0, 1.0, 0.0);
-    */
+    
     drawCube();
-    //glDisable(GL_DEPTH_TEST);
+    //drawWireCube();
+    //drawVoxel()
 }
 
 void Rhin::drawCube()
 {
-    //glBegin(GL_QUADS);
-    glBegin(GL_POLYGON);
+    glBegin(GL_QUADS);
+    //glBegin(GL_POLYGON);
     // front
     glColor3f( 0.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f,-1.0f, 1.0f);
@@ -154,6 +124,13 @@ void Rhin::drawCube()
     glEnd();
 }
 
+void Rhin::drawVoxel(Vector3 v)
+{
+    glPushMatrix();
+    glTranslatef(v.x, v.y, v.z);
+    drawCube();
+    glPopMatrix();
+}
 
 void Rhin::setCamera(GLfloat p, GLfloat t)
 {
@@ -181,16 +158,33 @@ void Rhin::setCamera(GLfloat p, GLfloat t)
 
 void Rhin::mouseMove(int x, int y)
 {
-    if (lBtnDn) {
         setCamera(float(x-oldPt.x), float(oldPt.y - y));       
         oldPt.x = x;              
         oldPt.y = y;
-    }
 }
 
 void Rhin::leftButtonDown(int x, int y)
 {
-    lBtnDn = true;
     oldPt.x = x;                      
     oldPt.y = y;
+}
+
+Vector3 Rhin::getScreenPos(int x, int y)
+{
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY, winZ;
+    GLdouble posX, posY, posZ;
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    
+    winX = (float)x;
+    winY = (float)viewport[3] - (float)y;
+    glReadPixels(x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+    gluUnProject(winX, winY, winZ, modelview, projection, viewport,
+        &posX, &posY, &posZ);
+    return Vector3(posX, posY, posZ);
 }

@@ -1,9 +1,9 @@
-/*
- * @file:   perrhin.h
- * @author: ChenYang
- * @date:   2014/11/18
- * @brief:
- */
+/********************************************************************
+         @filename:  prerhin.h
+         @author:    ChenYang
+         @date:      2014/11/18   19:43
+         @brief:	  
+ ********************************************************************/
 
 #ifndef __PRERHIN_H__
 #define __PRERHIN_H__
@@ -30,6 +30,8 @@ struct SphericalCoords {
     float theta;
 };
 
+class Vector3;
+
 class Rhin {
 public:
     Rhin();
@@ -41,9 +43,9 @@ public:
     void setupProjection(int width, int height);
     void reshape(int width, int height);
    
-    void prepare(float dt);
     void render();
 
+    void drawVoxel(Vector3 v);
     void drawCube();
     void leftButtonDown(int x, int y);
 
@@ -51,10 +53,12 @@ public:
 
     void setCamera(GLfloat p, GLfloat t);
 
+    Vector3 getScreenPos(int x, int y);
+
 private:
     int windowWidth;
     int windowHeight;
 
 };
 
-#endif // prerhin.h
+#endif // __PRERHIN_H__

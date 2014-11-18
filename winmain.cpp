@@ -1,3 +1,10 @@
+/********************************************************************
+         @filename:  winmain.cpp
+         @author:    ChenYang
+         @date:      2014/11/18   20:02
+         @brief:     
+ ********************************************************************/
+
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
 
@@ -6,6 +13,7 @@
 #include <GL/glu.h>
 
 #include "prerhin.h"
+#include "vector3.h"
 
 bool exiting = false;
 long windowWidth = 800;
@@ -13,6 +21,8 @@ long windowHeight = 600;
 long windowBits = 32;
 bool fullscreen = false;
 int x, y;
+bool lBtnDn = false;
+Vector3 vec;
 HDC hDC;
 
 Rhin *kGLRender = NULL;
@@ -92,19 +102,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             x = LOWORD(lParam);
             y = HIWORD(lParam);
             kGLRender->leftButtonDown(x, y);
+            lBtnDn = true;
             break;
         }
             
-        case WM_RBUTTONDOWN:        // right mouse button
-            break;
-
-        case WM_MOUSEMOVE: {         // mouse movement
+        case WM_RBUTTONDOWN: {       // right mouse button
             x = LOWORD(lParam);
             y = HIWORD(lParam);
-            kGLRender->mouseMove(x, y);
+            vec = kGLRender->getScreenPos(x, y);
+            kGLRender->drawVoxel(vec);
             break;
         }
-        case WM_LBUTTONUP:          // left button release
+
+        case WM_MOUSEMOVE: {         // mouse movement
+            if (lBtnDn) {       // left button is pressed and mouse move
+                x = LOWORD(lParam);
+                y = HIWORD(lParam);
+                kGLRender->mouseMove(x, y);
+            }
+            break;
+        }
+        case WM_LBUTTONUP: {          // left button release
+            lBtnDn = false;
+        }
             break;
 
         case WM_RBUTTONUP:          // right button release
