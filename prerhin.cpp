@@ -14,6 +14,7 @@
 #include <math.h>
 #include "prerhin.h"
 #include "vector3.h"
+#include "point3.h"
 
 // disable implicit float-double casting
 #pragma warning(disable:4305)
@@ -38,7 +39,7 @@ bool Rhin::init()
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //glMatrixMode(GL_MODELVIEW);
     //glLoadIdentity();
 //    gluLookAt(camera.xeye,camera.yeye,camera.zeye, 0.0 , 0.0, 0.0, 0.0, 1.0, 0.0);
@@ -58,7 +59,7 @@ void Rhin::reshape(int width, int height)
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-6.0, 6.0,-6.0, 6.0,-6.0, 6.0); 
+    glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0); 
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -74,11 +75,11 @@ void Rhin::render()
    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(camera.xeye,camera.yeye,camera.zeye, 0.0 , 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt(camera.xeye, camera.yeye, camera.zeye,  // camera position
+              0.0 , 0.0, 0.0, // center position
+              0.0, 1.0, 0.0); // up vector
     
     drawCube();
-    //drawWireCube();
-    //drawVoxel()
 }
 
 void Rhin::drawCube()
@@ -127,7 +128,7 @@ void Rhin::drawCube()
 void Rhin::drawVoxel(Vector3 v)
 {
     glPushMatrix();
-    glTranslatef(v.x, v.y, v.z);
+    //glTranslatef(v.x, v.y, v.z);
     drawCube();
     glPopMatrix();
 }
@@ -168,6 +169,17 @@ void Rhin::leftButtonDown(int x, int y)
     oldPt.x = x;                      
     oldPt.y = y;
 }
+
+
+void Rhin::rightButtonDown(Vector3 v)
+{
+    Vector3 rvec = Vector3(v.x-0, v.y-0, v.z-0);
+    if (rvec.length() >= 1) {
+        glTranslatef(v.x, v.y, v.z);
+        drawCube();
+    }
+}
+
 
 Vector3 Rhin::getScreenPos(int x, int y)
 {

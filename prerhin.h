@@ -31,6 +31,7 @@ struct SphericalCoords {
 };
 
 class Vector3;
+class Point3;
 
 class Rhin {
 public:
@@ -39,20 +40,35 @@ public:
 
     bool init();
     bool close();
-    
-    void setupProjection(int width, int height);
+
+    // When window size changed, resize it to ensure the 
+    // image won't be distorted.
     void reshape(int width, int height);
    
+    // Used to render scene
     void render();
 
     void drawVoxel(Vector3 v);
+    
+    // Draws a colorful cube
     void drawCube();
+
+    // When left button is clicked, get down the position
     void leftButtonDown(int x, int y);
 
+    // When right button is clicked, draw a voxel at where mouse clicked
+    void rightButtonDown(Vector3 v);
+
+    // While mouse moving, retrieves the mouse position (x,y) and convert it to 
+    // spherical coords, then use it to set camera position in 3d space.
     void mouseMove(int x, int y);
 
+    // Set camera's position in spherical coords.
     void setCamera(GLfloat p, GLfloat t);
 
+    // While mouse moving, retrieves the mouse position (x, y) and convert it
+    // from screen coordinate to OpenGL coordinate, return as type Vector3,
+    // later will be used to draw other voxels.
     Vector3 getScreenPos(int x, int y);
 
 private:

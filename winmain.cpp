@@ -20,10 +20,10 @@ long windowWidth = 800;
 long windowHeight = 600;
 long windowBits = 32;
 bool fullscreen = false;
-int x, y;
 bool lBtnDn = false;
 Vector3 vec;
-HDC hDC;
+static HGLRC hRC; // rendering context
+static HDC hDC;
 
 Rhin *kGLRender = NULL;
 
@@ -57,10 +57,9 @@ void setupPixelFormat(HDC hDC)
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    static HGLRC hRC; // rendering context
-    static HDC hDC;
     int width, height;
-    
+    int x, y;
+
     switch (msg) {
         case WM_CREATE: {   // window creation
             hDC = GetDC(hwnd);  // Get handle of the window you will draw
@@ -110,7 +109,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             x = LOWORD(lParam);
             y = HIWORD(lParam);
             vec = kGLRender->getScreenPos(x, y);
-            kGLRender->drawVoxel(vec);
+            kGLRender->rightButtonDown(vec);
             break;
         }
 
